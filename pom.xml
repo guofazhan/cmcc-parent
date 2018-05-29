@@ -3,46 +3,76 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>cn.leadeon</groupId>
   <artifactId>cmcc-parent</artifactId>
   <version>1.0.0</version>
   <packaging>pom</packaging>
 
   <name>cmcc-parent</name>
-  <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
+  <url>http://maven.apache.org</url>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>1.5.7.RELEASE</version>
+    <relativePath/>
+  </parent>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.version>1.8</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+
+    <script.java.path>/home/123/apr/lib</script.java.path>
+    <script.start.jar>${project.artifactId}.jar</script.start.jar>
+
+    <skip.enforcer>false</skip.enforcer>
+    <skip.assembly>false</skip.assembly>
+    <skip.boot>false</skip.boot>
   </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.11</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
-
   <build>
+    <finalName>${project.artifactId}</finalName>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.0.0</version>
         </plugin>
-        <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.7.0</version>
+          <configuration>
+            <source>${maven.compiler.source}</source>
+            <target>${maven.compiler.target}</target>
+            <encoding>${project.build.sourceEncoding}</encoding>
+          </configuration>
+        </plugin>
         <plugin>
           <artifactId>maven-resources-plugin</artifactId>
           <version>3.0.2</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.7.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -69,7 +99,18 @@
     </pluginManagement>
     <plugins>
       <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <skip>${skip.boot}</skip>
+        </configuration>
+      </plugin>
+      <!--配置参数校验插件 -->
+      <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
+        <configuration>
+          <skip>${skip.enforcer}</skip>
+        </configuration>
         <executions>
           <execution>
             <!-- 一个执行实例的id-->
@@ -95,14 +136,79 @@
                 </requireJavaVersion>
                 <!-- 依赖的Property规则-->
                 <requireProperty>
-                  <property>test.version</property>
-                  <message>"test version must be specified."</message>
+                  <property>main.class</property>
+                  <message>"mainClass must be specified."</message>
+                </requireProperty>
+                <requireProperty>
+                  <property>assembly.xml.path</property>
+                  <message>"assembly.xml.path must be specified."</message>
                 </requireProperty>
               </rules>
             </configuration>
           </execution>
         </executions>
       </plugin>
+      <!-- jar 文件生成插件 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <skip>${skip.boot}</skip>
+          <archive>
+            <!-- 添加index则不从mainfest中读取classpath，而是从Index.list中读取 -->
+            <index>true</index>
+            <manifest>
+              <mainClass>${main.class}</mainClass>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>lib/</classpathPrefix>
+              <classpathLayoutType>custom</classpathLayoutType>
+              <customClasspathLayout>lib/$${artifact.groupId}.$${artifact.artifactId}.$${artifact.extension}</customClasspathLayout>
+            </manifest>
+            <manifestEntries>
+              <Class-Path>./</Class-Path>
+            </manifestEntries>
+          </archive>
+          <excludes>
+            <exclude>config/**</exclude>
+            <exclude>mapper/**</exclude>
+            <exclude>mybatis/**</exclude>
+            <exclude>static/**</exclude>
+            <exclude>templates/**</exclude>
+            <exclude>*.txt</exclude>
+            <exclude>*.xml</exclude>
+            <exclude>*.properties</exclude>
+            <exclude>*.yml</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <!-- 打包zip插件 -->
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <skipAssembly>${skip.assembly}</skipAssembly>
+          <appendAssemblyId>false</appendAssemblyId>
+          <descriptors>
+            <descriptor>${assembly.xml.path}</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>java8</id>
+      <activation>
+        <jdk>[1.8,)</jdk>
+      </activation>
+    </profile>
+  </profiles>
 </project>
