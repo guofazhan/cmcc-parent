@@ -16,7 +16,6 @@
     <version>1.5.7.RELEASE</version>
     <relativePath/>
   </parent>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -27,8 +26,14 @@
     <script.java.path>/home/123/apr/lib</script.java.path>
     <script.start.jar>${project.artifactId}.jar</script.start.jar>
 
+    <!-- 构建文件放置目录 -->
+    <build.home>${project.basedir}/build-common</build.home>
+    <!-- 插件是否开启配置信息-->
+    <!--enforcer 插件 -->
     <skip.enforcer>false</skip.enforcer>
+    <!--assembly 插件 -->
     <skip.assembly>false</skip.assembly>
+    <!--spring boot 插件 -->
     <skip.boot>false</skip.boot>
   </properties>
   <dependencyManagement>
@@ -139,10 +144,6 @@
                   <property>main.class</property>
                   <message>"mainClass must be specified."</message>
                 </requireProperty>
-                <requireProperty>
-                  <property>assembly.xml.path</property>
-                  <message>"assembly.xml.path must be specified."</message>
-                </requireProperty>
               </rules>
             </configuration>
           </execution>
@@ -188,7 +189,7 @@
           <skipAssembly>${skip.assembly}</skipAssembly>
           <appendAssemblyId>false</appendAssemblyId>
           <descriptors>
-            <descriptor>${assembly.xml.path}</descriptor>
+            <descriptor>${build.home}/package/package.xml</descriptor>
           </descriptors>
         </configuration>
         <executions>

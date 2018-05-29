@@ -9,29 +9,7 @@
 	<fileSets>
 		<!-- 启动脚本文件打包 ST-->
 		<fileSet>
-			<directory>${project.basedir}/cmcc-common/common-build/bin/</directory>
-			<outputDirectory>${file.separator}</outputDirectory>
-			<includes>
-				<include>*.sh</include>
-				<include>*.cmd</include>
-			</includes>
-			<fileMode>755</fileMode>
-			<lineEnding>unix</lineEnding>
-			<filtered>true</filtered>
-		</fileSet>
-		<fileSet>
-			<directory>${parent.basedir}/cmcc-common/common-build/bin/</directory>
-			<outputDirectory>${file.separator}</outputDirectory>
-			<includes>
-				<include>*.sh</include>
-				<include>*.cmd</include>
-			</includes>
-			<fileMode>755</fileMode>
-			<lineEnding>unix</lineEnding>
-			<filtered>true</filtered>
-		</fileSet>
-		<fileSet>
-			<directory>${parent.basedir}/common-build/bin/</directory>
+			<directory>${build.home}/bin/</directory>
 			<outputDirectory>${file.separator}</outputDirectory>
 			<includes>
 				<include>*.sh</include>
@@ -44,11 +22,11 @@
 		<fileSet>
 			<directory>bin</directory>
 			<outputDirectory>${file.separator}</outputDirectory>
+			<fileMode>755</fileMode>
+			<lineEnding>unix</lineEnding>
 			<filtered>true</filtered>
 		</fileSet>
 		<!-- 启动脚本文件打包 END -->
-
-
 		<!--资源文件打包 -->
 		<fileSet>
 			<directory>src/main/resources</directory>
